@@ -1,14 +1,14 @@
 #!/bin/bash
-# $Id: spamupdate,v 1.3 2018/07/01 09:07:31 fulford Exp fulford $
+# $Id: spamupdate,v 1.4 2018/07/16 19:56:06 fulford Exp fulford $
 # $Source: /src/admin/usr/local/etc/RCS/spamupdate,v $
-# $Revision: 1.3 $
+# $Revision: 1.4 $
 # Author C W Fulford.
 # Copyright 2016 (c) C W Fulford.
 # Licensed for public use under the LGPL, .
 # For assistance contact fulford@fulford.net 0793 572 8612
 ########################################################################
 cmd=`basename $0`
-ver=`echo "$Id: spamupdate,v 1.3 2018/07/01 09:07:31 fulford Exp fulford $"|awk '{print $3,$4,$5}'`
+ver=`echo "$Id: spamupdate,v 1.4 2018/07/16 19:56:06 fulford Exp fulford $"|awk '{print $3,$4,$5}'`
 syntax="$cmd [-c <configfile>] [-d] [-h <hostid>] [-v]|-V"
 while [ $# -gt 0 ] ;do
 	case $1 in 
@@ -16,7 +16,7 @@ while [ $# -gt 0 ] ;do
 		-d) set -x;debug=0;shift;;
 		-h) hostid=$2;shift 2;;	
 		-v) verbose=:;shift;;
-		-V) echo "$cmd $Revision: 1.3 $ $Date: 2018/07/01 09:07:31 $"|awk '{print $1,$3,$6}';exit;; 
+		-V) echo "$cmd $Revision: 1.4 $ $Date: 2018/07/16 19:56:06 $"|awk '{print $1,$3,$6}';exit;; 
 	esac
 done
 
@@ -27,10 +27,11 @@ eval `sed <$config -ne "/^$hostid:/,/^$/{/^[\t ]*[^#].*/p}"`
 ssh mailhost '
 	cd mail
        	for f in spam? ;do 
+		[ -f $f.2 ] && mv $f.2 $f.3
 		[ -f $f.1 ] && mv $f.1 $f.2
 	       	cp $f $f.1
 		cp /dev/null  $f
-	       	[ -f $f.2 ] && sa-learn --mbox --spam $f.2
+	       	[ -f $f.3 ] && sa-learn --mbox --spam $f.3
        	done
 '
 
