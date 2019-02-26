@@ -1,14 +1,14 @@
 #!/bin/bash
-# $Id: spamupdate,v 1.8 2019/02/07 09:42:34 fulford Exp fulford $
+# $Id: spamupdate,v 1.9 2019/02/26 09:12:32 fulford Exp fulford $
 # $Source: /src/admin/usr/local/etc/RCS/spamupdate,v $
-# $Revision: 1.8 $
+# $Revision: 1.9 $
 # Author C W Fulford.
 # Copyright 2016 (c) C W Fulford.
 # Licensed for public use under the LGPL, .
 # For assistance contact fulford@fulford.net 0793 572 8612
 ########################################################################
 cmd=`basename $0`
-ver=`echo "$Id: spamupdate,v 1.8 2019/02/07 09:42:34 fulford Exp fulford $"|awk '{print $3,$4,$5}'`
+ver=`echo "$Id: spamupdate,v 1.9 2019/02/26 09:12:32 fulford Exp fulford $"|awk '{print $3,$4,$5}'`
 syntax="$cmd [-c <configfile>] [-d] [-h <hostid>] [-v]|-V"
 while [ $# -gt 0 ] ;do
 	case $1 in 
@@ -16,7 +16,7 @@ while [ $# -gt 0 ] ;do
 		-d) set -x;debug=0;shift;;
 		-h) hostid=$2;shift 2;;	
 		-v) verbose=:;shift;;
-		-V) echo "$cmd $Revision: 1.8 $ $Date: 2019/02/07 09:42:34 $"|awk '{print $1,$3,$6}';exit;; 
+		-V) echo "$cmd $Revision: 1.9 $ $Date: 2019/02/26 09:12:32 $"|awk '{print $1,$3,$6}';exit;; 
 	esac
 done
 
@@ -31,14 +31,17 @@ config=${config:-/usr/local/etc/${cmd}.cf}
 
 ssh mailhost '
 	cd mail
-       	for f in spam? ;do  #That's spamA, spamB etc.
+	# Look for spamA spamB etc
+       	for f in spam? ;do  
 		[ -f $f.4 ] && mv $f.4 $f.5
 		[ -f $f.3 ] && mv $f.3 $f.4
 		[ -f $f.2 ] && mv $f.2 $f.3
 		[ -f $f.1 ] && mv $f.1 $f.2
-	       	cp $f $f.1
+	       	cp $f ${f}.1
 		cp /dev/null  $f
-		[ -f $f.3 ] && sa-learn --mbox --spam $f.3
+		[ -f $f.3 ] &&{
+			sa-learn --mbox --spam $f.3
+		}
        	done
 '
 
